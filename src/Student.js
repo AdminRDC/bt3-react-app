@@ -29,17 +29,17 @@ class Student extends React.Component {
     delStudentHandler(id){
         this.delStudentById(id,({status,message})=>{
             if(status === 200){
-            alert(message);
+                alert(message);
             this.loadStudent();
             } else {
-            alert(message);
+                alert(message);
             }
         })
     }
     delStudentById(id,handler){
-        let url = "http://203.195.246.58:8888/user/deleteById?id="+id;
+        let url = "http://203.195.246.58:8888/user/deleteUserById?id="+id;
         $.get(url,function(result){
-        handler(result);
+            handler(result);
         })
     }
     loadStudent(){
@@ -89,7 +89,7 @@ class Student extends React.Component {
                                         <td>{item.realname}</td>
                                         <td>{item.gender}</td>
                                         <td>
-                                            <span onClick={this.delStudentHandler}>删除</span>
+                                            <span onClick={this.delStudentHandler.bind(this,item.id)}>删除</span>
                                             <span>修改</span>
                                         </td>
                                     </tr>                
