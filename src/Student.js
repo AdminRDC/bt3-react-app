@@ -21,7 +21,7 @@ class Student extends React.Component {
         console.log(tagName,tagVal);
         this.setState({
         form:{...this.state.form,...{[tagName]:tagVal}}
-    })
+        })
     }
     componentWillMount(){
         this.loadStudent();
