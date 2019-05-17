@@ -4,6 +4,7 @@ import Student from './day02/Student'
 import Teacher from './day04/Teacher'
 import Course from './day03/Course'
 import SC from './day03/SC'
+import Clock from './day02/Clock'
 
 import {BrowserRouter,Route,Link,Switch} from 'react-router-dom'
 
@@ -11,7 +12,8 @@ function App() {
   return (
     <div className="App">
       <header className='header'>
-        <h1>学生选课系统</h1>
+        <h1>学生选课系统</h1><br/>
+        <Clock />
       </header>
       <article className="content">
       <BrowserRouter>

@@ -1,37 +1,81 @@
 import React from 'react';
 import $ from 'jquery';
-import {Form,Input,Button,Table} from 'antd';
+import {Button,Table} from 'antd';
 
+global.constants = {
+    //初始化批量删除id数组|全局变量
+    ids : []
+}
 
 class Course extends React.Component {
 constructor(){
     super();
     this.state = {
-    teachers:[],
-    courses:[],
-    form:{
-        name:"",
-        credit:"",
-        description:"",
-        teacherId:""
-    }
+        teachers:[],
+        courses:[],
+        form:{
+            name:"",
+            credit:"",
+            description:"",
+            teacherId:""
+        }
     }
 }
-loadTeachers(){
-    let url = "http://203.195.246.58:8888/user/findAllTeacher"
-    $.get(url,({status,message,data})=>{
-    if(status === 200){
-        this.setState({
-        teachers:data,
-        form:{
-            ...this.state.form,
-            ...{teacherId:data[0].id}
+
+changeHandler = (event)=>{
+    let tagName = event.target.name;  
+    let tagVal = event.target.value;
+    console.log(tagName,tagVal);
+    this.setState({
+    form:{...this.state.form,...{[tagName]:tagVal}}
+    })
+}
+
+delCourseHandler(id){
+    this.delCourseById(id,({status,message})=>{
+        if(status === 200){
+            alert(message);
+            this.loadCourses();
+        } else {
+            alert(message);
         }
-        })
-    } else {
-        alert(message);
-    }
-    });}
+    })
+}
+
+delCourseBanchByIdsHandler(){
+    this.delCourseBanchByIds(({status,message})=>{
+        if(status === 200){
+            alert(message);
+            this.loadCourses();
+        } else {
+            alert(message);
+        }
+    })
+}
+
+// 根据ID删除课程信息
+delCourseById(id,handler){
+    let url = "http://203.195.246.58:8888/course/deleteCourseById?id="+id;
+    $.get(url,function(result){
+        handler(result);
+    })
+}
+
+// 根据ID批量删除课程信息
+delCourseBanchByIds(handler){
+    $.ajax({
+        type: "post",
+        url: "http://203.195.246.58:8888/course/deleteCourseBanchByIds",
+        contentType:"application/json",
+        dataType: 'json',
+        data: '['+[global.constants.ids]+']',
+        success:function(result){
+            handler(result);
+        }
+    });
+}
+
+// 加载课程信息
 loadCourses(){
     $.get("http://203.195.246.58:8888/course/findAllWithTeacher",({status,message,data})=>{
     if(status === 200){
@@ -43,12 +87,13 @@ loadCourses(){
     }
     });
 }
-  // 网络初始化
+
+// 数据初始化
 componentWillMount(){
-    this.loadTeachers();
     this.loadCourses();
 }
-  // 将input上的状态映射到组件state中
+
+// 将input上的状态映射到组件state中
 changeHandler = (event)=>{
     let name = event.target.name;// name/description/credit
     let val = event.target.value;
@@ -57,7 +102,7 @@ changeHandler = (event)=>{
     })
 }
 
-  // 提交
+// from表单提交更新操作(未完善)
 submitForm = (event)=>{
     // 1. 获取表单数据
     alert(JSON.stringify(this.state.form));
@@ -88,20 +133,41 @@ render(){
     title: '任课教师',
     dataIndex: 'teacher.realname',
     },{
-        title: 'Action',
+        title: '操作',
         key: 'action',
         render: (text, record) => (
         <span>
-            <a href="javascript:;">Update </a>
-            <span onClick="">Delete</span>
+            <Button>Update </Button>
+            <Button onClick={this.delCourseHandler.bind(this,record.id)}>Delete</Button>
         </span>
-        ),
+        )
     }]
+
+    //行选择器
+    const rowSelection = {
+        onChange: (selectedRowKeys, selectedRows) => {
+            //遍历selectedRows拿到id集合
+            global.constants.ids = [];
+            for(let i=0;i<selectedRows.length;i++){
+                let {id} = selectedRows[i];
+                global.constants.ids.push(id);
+            }
+        // console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+        },
+        getCheckboxProps: record => ({
+        disabled: record.name === 'Disabled User', // Column configuration not to be checked
+        name: record.name,
+        })
+    }
 
     return (
     <div className="course">
         <h2>课程管理</h2>
-        {/* 表单 */}
+        {/* 批量删除按钮 */}
+        <Button type='danger' onClick={this.delCourseBanchByIdsHandler.bind(this)}>批量删除</Button><br/>
+        {/* antd表格 */}
+        <Table rowKey={record => record.id} bordered={true} rowSelection={rowSelection} columns={columns} dataSource={courses} />
+        {/* form表单 */}
         {JSON.stringify(form)}
         <form onSubmit={this.submitForm}>
         课程名称
@@ -120,8 +186,6 @@ render(){
         </select> <br/>
         <input type="submit" value="提交"/>
         </form>
-        {/* 课程信息 */}
-        <Table bordered={true} columns={columns} dataSource={courses} />
     </div>
     ) 
 }
