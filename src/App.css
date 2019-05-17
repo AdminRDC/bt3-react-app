@@ -1,0 +1,32 @@
+.App {
+  text-align: left;
+}
+
+html,body,#root,.App {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.App > .header {
+  height: 100px;
+  background-color: rgb(69, 171, 255);
+  color: #ffffff;
+  padding: 0 2em;
+}
+.App > .content {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+} 
+
+.App > .content .nav {
+  width: 200px;
+  border-right: 1px solid #ccc;
+  font-size: 20px;
+}
+.App > .content .content-right {
+  flex:1;
+  padding: 1em;
+}
+
